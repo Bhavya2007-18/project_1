@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synthetix T2I Hub - Advanced GAN & Diffusion Pipeline</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="url(#logo-grad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <defs>
+                            <linearGradient id="logo-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+                                <stop stop-color="#8a2be2" />
+                                <stop offset="1" stop-color="#00ffff" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                </div>
+                <h1 class="brand-name">SYNTHETIX</h1>
+            </div>
+            
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="overview">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-label">Pipeline Overview</span>
+                </button>
+                <button class="nav-item" data-tab="tokenizer">
+                    <span class="nav-icon">🔤</span>
+                    <span class="nav-label">Text Tokenizer</span>
+                </button>
+                <button class="nav-item" data-tab="cgan">
+                    <span class="nav-icon">📐</span>
+                    <span class="nav-label">Shape CGAN</span>
+                </button>
+                <button class="nav-item" data-tab="attention">
+                    <span class="nav-icon">👁️</span>
+                    <span class="nav-label">Attention Maps</span>
+                </button>
+                <button class="nav-item" data-tab="dataset">
+                    <span class="nav-icon">📂</span>
+                    <span class="nav-label">Dataset Explorer</span>
+                </button>
+                <button class="nav-item" data-tab="refinement">
+                    <span class="nav-icon">🧪</span>
+                    <span class="nav-label">LoRA Refinement</span>
+                </button>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <span class="indicator-dot online"></span>
+                    <span class="status-text">Pipeline Engine: Active</span>
+                </div>
+                <div class="env-tag">Windows local sandbox</div>
+            </div>
+        </aside>
+
+        <!-- Main Content Panel -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="top-header">
+                <div class="header-title">
+                    <h2 id="current-tab-title">Pipeline Overview</h2>
+                    <p id="current-tab-desc" class="subtitle">End-to-End Deep Learning Text-to-Image Pipeline Sandbox</p>
+                </div>
+                <div class="system-stats">
+                    <div class="stat-badge">
+                        <span class="stat-lbl">LATENT DIM</span>
+                        <span class="stat-val">100</span>
+                    </div>
+                    <div class="stat-badge">
+                        <span class="stat-lbl">EMBEDDING DIM</span>
+                        <span class="stat-val">512</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- TAB 1: PIPELINE OVERVIEW -->
+            <section class="tab-pane active" id="pane-overview">
+                <div class="dashboard-grid">
+                    <!-- Column 1: Input -->
+                    <div class="glass-card main-input-card">
+                        <div class="card-header">
+                            <h3>1. Unified Pipeline Input</h3>
+                            <span class="step-num">STEP 1</span>
+                        </div>
+                        <div class="card-body">
+                            <label for="pipeline-prompt" class="field-label">Text Description / Prompt</label>
+                            <div class="input-group">
+                                <input type="text" id="pipeline-prompt" placeholder="e.g., a crimson rose under a blue sky, or triangle shape..." value="a gorgeous red rose under the golden sun">
+                                <button id="btn-run-pipeline" class="btn btn-primary">Run Pipeline</button>
+                            </div>
+                            <div class="presets-section">
+                                <span class="presets-lbl">Quick Presets:</span>
+                                <div class="presets-list">
+                                    <button class="preset-tag" data-prompt="a gorgeous red rose under the golden sun">Crimson Rose</button>
+                                    <button class="preset-tag" data-prompt="a golden circle shape centered">CGAN Circle</button>
+                                    <button class="preset-tag" data-prompt="a blue square shape centered">CGAN Square</button>
+                                    <button class="preset-tag" data-prompt="vibrant green wild geranium flowers">Geranium</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 2: Pipeline Telemetry Flow -->
+                    <div class="glass-card telemetry-card">
+                        <div class="card-header">
+                            <h3>2. Processing Flow Telemetry</h3>
+                            <span class="step-num">STEP 2</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="pipeline-flow-vertical">
+                                <div class="flow-step" id="flow-tok">
+                                    <div class="flow-indicator"></div>
+                                    <div class="flow-info">
+                                        <h4>Text Processing & Tokenization</h4>
+                                        <p class="flow-details">Split into subwords, generate token IDs & attention mask.</p>
+                                        <div class="flow-micro-output" id="flow-tok-output">-</div>
+                                    </div>
+                                </div>
+                                <div class="flow-step" id="flow-emb">
+                                    <div class="flow-indicator"></div>
+                                    <div class="flow-info">
+                                        <h4>Embedding Space Mapping</h4>
+                                        <p class="flow-details">Hugging Face CLIP Text Encoder mapping tokens to 512-dim vector.</p>
+                                        <div class="flow-micro-output" id="flow-emb-output">-</div>
+                                    </div>
+                                </div>
+                                <div class="flow-step" id="flow-route">
+                                    <div class="flow-indicator"></div>
+                                    <div class="flow-info">
+                                        <h4>Conditioning & Routing Engine</h4>
+                                        <p class="flow-details">Categorical routing for shapes vs text-based attention GAN.</p>
+                                        <div class="flow-micro-output" id="flow-route-output">-</div>
+                                    </div>
+                                </div>
+                                <div class="flow-step" id="flow-gen">
+                                    <div class="flow-indicator"></div>
+                                    <div class="flow-info">
+                                        <h4>Image Synthesis & Attention Grid</h4>
+                                        <p class="flow-details">Generator network forward pass incorporating self and cross-attention weights.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Output Visualizer -->
+                    <div class="glass-card output-card">
+                        <div class="card-header">
+                            <h3>3. Generated Output & Attention Map</h3>
+                            <span class="step-num">STEP 3</span>
+                        </div>
+                        <div class="card-body center-flex">
+                            <div class="output-wrapper">
+                                <div class="canvas-container">
+                                    <canvas id="pipeline-output-canvas" width="256" height="256"></canvas>
+                                    <div class="attention-overlay" id="pipeline-attn-overlay"></div>
+                                </div>
+                                <div class="output-telemetry">
+                                    <span class="out-lbl">Active Model:</span>
+                                    <span id="pipeline-active-model" class="out-val">-</span>
+                                </div>
+                            </div>
+                            
+                            <div class="pipeline-interaction-hint" id="pipeline-hint">
+                                Hover over the tokenized words below to view their corresponding spatial cross-attention heatmaps on the output canvas.
+                            </div>
+                            
+                            <div id="pipeline-tokens-container" class="token-container">
+                                <!-- Populated dynamically -->
+                                <span class="no-tokens-placeholder">Run pipeline to display tokens</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: TEXT TOKENIZER -->
+            <section class="tab-pane" id="pane-tokenizer">
+                <div class="split-layout">
+                    <div class="left-col glass-card">
+                        <div class="card-header">
+                            <h3>Hugging Face Tokenizer Simulator</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-desc">Tokenize descriptions using CLIP subword vocabulary mapping (49,408 unique tokens). This transforms text strings into numerical tensors readable by deep learning layers.</p>
+                            
+                            <div class="form-group">
+                                <label for="tok-input-text" class="field-label">Raw Caption Prompt</label>
+                                <textarea id="tok-input-text" rows="3" placeholder="Type prompt here...">a bright yellow sunflower standing tall against a clear sky</textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button id="btn-tokenize" class="btn btn-primary btn-full">Tokenize and Encode</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="right-col glass-card">
+                        <div class="card-header">
+                            <h3>Encoded Multi-Dimensional Tensor Representation</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="stats-panel">
+                                <div class="stat-item">
+                                    <span class="stat-title">Subword Tokens</span>
+                                    <span class="stat-number" id="tok-stat-count">0</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-title">Embedding Shape</span>
+                                    <span class="stat-number" id="tok-stat-shape">[1, 77, 512]</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-title">Sequence Length</span>
+                                    <span class="stat-number">77 (Padded)</span>
+                                </div>
+                            </div>
+                            
+                            <div class="tensor-section">
+                                <h4 class="tensor-title">Subword Token Segmentation</h4>
+                                <div id="tok-display-subwords" class="subwords-grid">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                            
+                            <div class="tensor-section">
+                                <h4 class="tensor-title">Input IDs Tensor (`input_ids`)</h4>
+                                <div id="tok-display-ids" class="ids-tensor-grid">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                            
+                            <div class="tensor-section">
+                                <h4 class="tensor-title">Latent Embedding Space Map (512-dim slice)</h4>
+                                <div id="tok-display-embedding" class="embedding-map-grid">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: SHAPE CGAN -->
+            <section class="tab-pane" id="pane-cgan">
+                <div class="split-layout">
+                    <div class="left-col glass-card">
+                        <div class="card-header">
+                            <h3>CGAN Generator Controls</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-desc">A Conditional GAN utilizes textual labels alongside noise vectors ($z$) as dual inputs. Adjust settings to see how label conditioning directs shape structure generation.</p>
+                            
+                            <div class="form-group">
+                                <label class="field-label">1. Conditional Input (Label Class)</label>
+                                <div class="cgan-class-selector">
+                                    <label class="class-btn active">
+                                        <input type="radio" name="cgan-class" value="circle" checked>
+                                        <span>Circle</span>
+                                    </label>
+                                    <label class="class-btn">
+                                        <input type="radio" name="cgan-class" value="square">
+                                        <span>Square</span>
+                                    </label>
+                                    <label class="class-btn">
+                                        <input type="radio" name="cgan-class" value="triangle">
+                                        <span>Triangle</span>
+                                    </label>
+                                    <label class="class-btn">
+                                        <input type="radio" name="cgan-class" value="star">
+                                        <span>Star (Custom)</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="field-label">2. Latent Noise Dimensions ($z \in \mathbb{R}^{100}$)</label>
+                                <div class="noise-sliders">
+                                    <div class="slider-row">
+                                        <span class="slider-lbl">Dim 01 (Scale)</span>
+                                        <input type="range" class="noise-slider" id="cgan-noise-1" min="-3" max="3" step="0.1" value="0.5">
+                                        <span class="slider-val" id="cgan-noise-1-val">0.5</span>
+                                    </div>
+                                    <div class="slider-row">
+                                        <span class="slider-lbl">Dim 02 (Rotation)</span>
+                                        <input type="range" class="noise-slider" id="cgan-noise-2" min="-3" max="3" step="0.1" value="-0.2">
+                                        <span class="slider-val" id="cgan-noise-2-val">-0.2</span>
+                                    </div>
+                                    <div class="slider-row">
+                                        <span class="slider-lbl">Dim 03 (Eccentricity)</span>
+                                        <input type="range" class="noise-slider" id="cgan-noise-3" min="-3" max="3" step="0.1" value="1.2">
+                                        <span class="slider-val" id="cgan-noise-3-val">1.2</span>
+                                    </div>
+                                </div>
+                                <button id="btn-cgan-randomize" class="btn btn-secondary btn-full">Randomize Latent Noise Vector</button>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="field-label">3. GAN Training Artifact Emulation</label>
+                                <div class="slider-row">
+                                    <span class="slider-lbl">Generator Noise Floor</span>
+                                    <input type="range" id="cgan-noise-floor" min="0" max="0.5" step="0.01" value="0.05">
+                                    <span class="slider-val" id="cgan-noise-floor-val">0.05</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="right-col glass-card center-flex">
+                        <div class="card-header">
+                            <h3>CGAN Synthesized Image</h3>
+                        </div>
+                        <div class="card-body center-flex">
+                            <div class="cgan-viewport">
+                                <canvas id="cgan-canvas" width="256" height="256"></canvas>
+                                <div class="cgan-spec">
+                                    <div class="spec-col">
+                                        <span class="spec-title">RESOLUTION</span>
+                                        <span class="spec-value">64 x 64 px</span>
+                                    </div>
+                                    <div class="spec-col">
+                                        <span class="spec-title">LATENT VECTOR</span>
+                                        <span class="spec-value" id="cgan-spec-z">z ~ N(0, I)</span>
+                                    </div>
+                                    <div class="spec-col">
+                                        <span class="spec-title">CONDITION</span>
+                                        <span class="spec-value" id="cgan-spec-cond">circle</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: ATTENTION MAPS -->
+            <section class="tab-pane" id="pane-attention">
+                <div class="split-layout">
+                    <div class="left-col glass-card">
+                        <div class="card-header">
+                            <h3>Attention Guidance Sandbox</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-desc">Self-Attention analyzes pixel-to-pixel correlations, while Cross-Attention links pixels to words. Select a prompt below, then hover over individual words to visualize the corresponding cross-attention weights mapping.</p>
+                            
+                            <div class="form-group">
+                                <label for="attn-prompt-select" class="field-label">Prompt Target Scenario</label>
+                                <select id="attn-prompt-select">
+                                    <option value="scen-rose">a bright red rose standing on green grass beneath blue sky</option>
+                                    <option value="scen-island">a tropical island with green palm trees surrounded by deep turquoise water</option>
+                                    <option value="scen-fire">vibrant orange fire flames blazing high against dark pitch black background</option>
+                                </select>
+                            </div>
+                            
+                            <div class="token-list-interactive" id="attn-token-hover-list">
+                                <!-- Populated dynamically with words -->
+                            </div>
+                            
+                            <div class="attention-math-info">
+                                <div class="math-title">Attention Formula:</div>
+                                <code class="math-expr">Attention(Q, K, V) = softmax( (Q Kᵀ) / √d_k ) V</code>
+                                <p class="math-explanation">Here, Queries ($Q$) represent image spatial features, Keys ($K$) correspond to token word embeddings, and Values ($V$) represent structural visual contents.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="right-col glass-card center-flex">
+                        <div class="card-header">
+                            <h3>AttnGAN Feature Synthesis Viewport</h3>
+                        </div>
+                        <div class="card-body center-flex">
+                            <div class="canvas-container large-canvas">
+                                <canvas id="attn-image-canvas" width="300" height="300"></canvas>
+                                <div class="attention-overlay" id="attn-overlay-map"></div>
+                            </div>
+                            <div class="attention-metrics">
+                                <div class="metric-row">
+                                    <span class="m-lbl">Current Active Focus:</span>
+                                    <span class="m-val" id="attn-active-word">-</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="m-lbl">Max Weight Intensity:</span>
+                                    <span class="m-val" id="attn-max-weight">0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: DATASET EXPLORER -->
+            <section class="tab-pane" id="pane-dataset">
+                <div class="dashboard-grid">
+                    <!-- Left: Metadata Summary & Stats -->
+                    <div class="glass-card card-half">
+                        <div class="card-header">
+                            <h3>Public Dataset Statistics (Oxford-102 Flowers)</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="dataset-stats-summary">
+                                <div class="d-stat-box">
+                                    <span class="d-stat-num">8,189</span>
+                                    <span class="d-stat-lbl">Total Images</span>
+                                </div>
+                                <div class="d-stat-box">
+                                    <span class="d-stat-num">102</span>
+                                    <span class="d-stat-lbl">Classes (Categories)</span>
+                                </div>
+                                <div class="d-stat-box">
+                                    <span class="d-stat-num">10</span>
+                                    <span class="d-stat-lbl">Captions per Image</span>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-section">
+                                <h4>Description Word Count Distribution</h4>
+                                <div class="bar-chart-container">
+                                    <div class="chart-y-axis">
+                                        <span>300</span>
+                                        <span>150</span>
+                                        <span>0</span>
+                                    </div>
+                                    <div class="bar-chart" id="chart-caption-length">
+                                        <!-- Dynamic bars -->
+                                    </div>
+                                </div>
+                                <div class="chart-labels">
+                                    <span>5 words</span>
+                                    <span>10 words</span>
+                                    <span>15 words</span>
+                                    <span>20 words</span>
+                                    <span>25+ words</span>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-section">
+                                <h4>Image Resolution Distribution</h4>
+                                <div class="resolution-distribution-list">
+                                    <div class="res-row">
+                                        <span class="res-spec">500 x 600 px (Portrait)</span>
+                                        <div class="res-bar-track"><div class="res-bar-fill" style="width: 45%;"></div></div>
+                                        <span class="res-pct">45%</span>
+                                    </div>
+                                    <div class="res-row">
+                                        <span class="res-spec">640 x 480 px (Landscape)</span>
+                                        <div class="res-bar-track"><div class="res-bar-fill" style="width: 38%;"></div></div>
+                                        <span class="res-pct">38%</span>
+                                    </div>
+                                    <div class="res-row">
+                                        <span class="res-spec">500 x 500 px (Square)</span>
+                                        <div class="res-bar-track"><div class="res-bar-fill" style="width: 17%;"></div></div>
+                                        <span class="res-pct">17%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Dataset Gallery -->
+                    <div class="glass-card card-half">
+                        <div class="card-header">
+                            <h3>Dataset Captions & Image Explorer</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="gallery-controls">
+                                <label for="gallery-class-filter" class="field-label">Filter Category</label>
+                                <select id="gallery-class-filter">
+                                    <option value="all">All Categories</option>
+                                    <option value="pink-primrose">Pink Primrose (Category 1)</option>
+                                    <option value="wild-geranium">Wild Geranium (Category 5)</option>
+                                    <option value="fire-lily">Fire Lily (Category 12)</option>
+                                    <option value="globe-thistle">Globe Thistle (Category 24)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="gallery-grid" id="dataset-gallery">
+                                <!-- Dynamic item cards -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 6: LORA REFINEMENT -->
+            <section class="tab-pane" id="pane-refinement">
+                <div class="split-layout">
+                    <!-- Left Panel: Refinement Controls -->
+                    <div class="left-col glass-card">
+                        <div class="card-header">
+                            <h3>PEFT / LoRA Refinement Dashboard</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="section-desc">Fine-tune a pre-trained Stable Diffusion model on custom visual domains. LoRA injects low-rank trainable weight matrices into cross-attention layers, reducing parameter load while achieving high domain alignment.</p>
+                            
+                            <div class="form-group">
+                                <label for="ref-domain-select" class="field-label">Target Visual Domain</label>
+                                <select id="ref-domain-select">
+                                    <option value="art">Renaissance Oil Painting Style</option>
+                                    <option value="medical">CT/MRI Scan Domain Synthesis</option>
+                                </select>
+                            </div>
+                            
+                            <div class="stats-panel inline-stats">
+                                <div class="stat-item">
+                                    <span class="stat-title">Base Parameters</span>
+                                    <span class="stat-number">860M</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-title">LoRA Parameters</span>
+                                    <span class="stat-number">3.1M</span>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-title">GPU VRAM Limit</span>
+                                    <span class="stat-number text-highlight">~4.5 GB</span>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <button id="btn-start-refinement" class="btn btn-primary btn-full">Start Fine-Tuning Execution</button>
+                            </div>
+                            
+                            <!-- Training console -->
+                            <div class="training-console">
+                                <div class="console-hdr">
+                                    <span>Training Console Logs</span>
+                                    <span class="console-status" id="console-status-text">Idle</span>
+                                </div>
+                                <div class="console-body" id="console-logs">
+                                    [SYSTEM] Ready for custom domain training simulator. Select a domain and click start.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right Panel: Graphs & Output comparisons -->
+                    <div class="right-col glass-card">
+                        <div class="card-header">
+                            <h3>Training Loss Curve & Image Progression</h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Loss curve visualization -->
+                            <div class="loss-curve-section">
+                                <h4>Dynamic Training Loss ($L_{diffusion}$)</h4>
+                                <div class="loss-chart-container">
+                                    <svg viewBox="0 0 400 150" class="loss-svg">
+                                        <!-- Grid lines -->
+                                        <line x1="40" y1="10" x2="400" y2="10" stroke="#2a2e3d" stroke-dasharray="4"/>
+                                        <line x1="40" y1="70" x2="400" y2="70" stroke="#2a2e3d" stroke-dasharray="4"/>
+                                        <line x1="40" y1="130" x2="400" y2="130" stroke="#2a2e3d" stroke-dasharray="4"/>
+                                        
+                                        <!-- Y Axis labels -->
+                                        <text x="5" y="15" fill="#8f9cae" font-size="10">2.5</text>
+                                        <text x="5" y="75" fill="#8f9cae" font-size="10">1.2</text>
+                                        <text x="5" y="135" fill="#8f9cae" font-size="10">0.0</text>
+                                        
+                                        <!-- X Axis labels -->
+                                        <text x="40" y="148" fill="#8f9cae" font-size="10">Epoch 0</text>
+                                        <text x="210" y="148" fill="#8f9cae" font-size="10">Epoch 5</text>
+                                        <text x="370" y="148" fill="#8f9cae" font-size="10">Epoch 10</text>
+                                        
+                                        <!-- Dynamic path -->
+                                        <path id="loss-path" d="" fill="none" stroke="#00ffff" stroke-width="2" />
+                                    </svg>
+                                </div>
+                            </div>
+                            
+                            <!-- Before/After comparison -->
+                            <div class="comparison-section">
+                                <h4>Model Alignment Synthesis Comparison</h4>
+                                <div class="comparison-images">
+                                    <div class="comp-box">
+                                        <div class="comp-tag">Base Pre-trained Model</div>
+                                        <canvas id="comp-base-canvas" width="160" height="160"></canvas>
+                                        <p class="comp-desc" id="comp-base-lbl">Generic Digital Representation</p>
+                                    </div>
+                                    <div class="comp-box">
+                                        <div class="comp-tag highlight-tag">Refined LoRA Model</div>
+                                        <canvas id="comp-refined-canvas" width="160" height="160"></canvas>
+                                        <p class="comp-desc" id="comp-refined-lbl">Domain-Specific Alignment</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
